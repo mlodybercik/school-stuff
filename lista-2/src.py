@@ -68,3 +68,50 @@ for i in zip(enumerate([bubble, insert, select]), ["red", "green", "blue"]):
 plt.xlabel("wielkość zbioru [1]")
 plt.ylabel("czas [s]")
 plt.show()
+
+def bubble_mod1(tab):
+    # przerwanie gdy nie było żadnej zamiany
+    for i in range(len(tab)):
+        for j in range(0, len(tab)-1):
+            if (tab[j]>tab[j+1]):
+                temp=tab[j]
+                tab[j]=tab[j+1]
+                tab[j+1]=temp
+            else:
+                continue
+    return tab
+
+def bubble_mod2(tab):
+    # jedno mniej co iteracje
+    for i in range(len(tab)):
+        for j in range(0, len(tab)-1 - i):
+            if (tab[j]>tab[j+1]):
+                temp=tab[j]
+                tab[j]=tab[j+1]
+                tab[j+1]=temp
+    return tab
+
+print(bubble_mod1(generuj_tablice(5, -10, 10)))
+print(bubble_mod2(generuj_tablice(5, -10, 10)))
+
+wielkosci = list(range(1, 1001, 10))
+czasy = []
+for funkcja in [bubble, bubble_mod1, bubble_mod2]:
+    czas = []
+    for size in wielkosci:
+        print(size)
+        czas_per_wielkosc = []
+        for _ in range(10):
+            czas_per_wielkosc.append(timeit(funkcja, size))
+        czas.append(np.mean(czas_per_wielkosc))
+        clear_output(wait = True)
+    czasy.append(czas)
+    
+fig = plt.figure()
+ax = plt.subplot()
+for i in zip(enumerate([bubble, bubble_mod1, bubble_mod2]), ["red", "green", "blue"]):
+    ax.plot(wielkosci, czasy[i[0][0]], color=i[1], label=str(i[0][1]).split()[1])
+    ax.legend()
+plt.xlabel("wielkość zbioru [1]")
+plt.ylabel("czas [s]")
+plt.show()
