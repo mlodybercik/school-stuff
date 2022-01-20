@@ -1,0 +1,64 @@
+{%- macro render_badge(text, type, dark_text=False, special_style=None) -%}
+    <span class="badge bg-{{type}} {{ 'text-dark' if dark_text else '' }}" style="{{ special_style if special_style}}">{{text}}</span>
+{%- endmacro -%}
+
+{% macro _render_card_title(running, service) %}
+    <h4 class="card-title" style="font-family: monospace;">
+    {{service.name}}
+    {% if running %}
+        {{ render_badge("Running", "success") }}
+    {% else %}
+        {{ render_badge("No connection", "danger")}}
+    {% endif %}
+    </h4>
+{% endmacro %}
+
+{% macro _render_card_text(type, service) %}
+    <div class="card-text font-monospace">
+        {% if type != None %}
+            <p class="mb-1"><a href="{{service.address}}">{{service.address}}</a></p>
+        {% else %}
+            <p class="mb-1"><span>{{service.address}}</span></p>
+        {% endif %}
+
+        <p class="mb-0">{{ render_badge("Type", "info", True, "border-top-right-radius: 0; border-bottom-right-radius: 0") }}
+            {%- if type == "generator" -%}
+                {{ render_badge("Generator", "primary", special_style="border-top-left-radius: 0; border-bottom-left-radius: 0") }}
+            {%- elif type == "aggregator" -%}
+                {{ render_badge("Aggregator", "secondary", special_style="border-top-left-radius: 0; border-bottom-left-radius: 0") }}
+            {%- elif type == "generator-filter" -%}
+                {{ render_badge("Generator filter", "warning", True, special_style="border-top-left-radius: 0; border-bottom-left-radius: 0") }}
+            {%- elif type == "graphing-aggregator" -%}
+                {{ render_badge("graphing-aggregator", "success", special_style="border-top-left-radius: 0; border-bottom-left-radius: 0") }}
+            {%- else -%}
+                {{ render_badge("Unknown?!", "dark", special_style="border-top-left-radius: 0; border-bottom-left-radius: 0") }}
+            {%- endif -%}
+        </p>
+    </div>
+{% endmacro %}}
+
+
+{% macro _render_card_footer(is_alive, name) %}
+    <div class="card-footer">
+    {% if is_alive %}
+        <a class="btn btn-success text-white" href="{{ url_for('controller.manage', name=name) }}">Manage</a>
+    {% else %}
+        <a class="btn btn-danger disabled text-white">Manage</a>
+    {% endif %}
+    </div>
+{% endmacro %}
+
+
+{% macro render_card(card) %}
+    <div class="card shadow h-100">
+        <div class="card-body">
+            {{ _render_card_title(card[1], card[0]) }}
+            {% if card[1] and "type" in card[1] %}
+                {{ _render_card_text(card[1]["type"], card[0]) }}
+            {% else %}
+                {{ _render_card_text(None, card[0])}}
+            {% endif %}
+        </div>
+        {{ _render_card_footer(card[1], card[0].name) }}
+    </div>
+{% endmacro %}

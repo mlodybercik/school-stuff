@@ -1,0 +1,14 @@
+{% from "include/macros.jinja" import render_card with context %}
+
+{% extends "include/main.jinja" %}
+{% block title %} index {% endblock title %}
+
+{% block content %}
+<div class="row mt-5">
+{% for service in manager %}
+    <div class="col-lg-4 mb-3">
+        {{ render_card(service) }}
+    </div>
+{% endfor %}
+</div>
+{% endblock content %}

@@ -1,0 +1,93 @@
+{# Passed arguments here should include: status and service #}
+
+{% from "include/manage_base.jinja" import render_manage_title with context %}
+{% from "include/manage_base.jinja" import render_subservices with context %}
+{% from "include/manage_base.jinja" import render_forms with context %}
+
+{% extends "include/main.jinja" %}
+
+{% block title %}{{ data["name"] if data["name"] else service.name }}{% endblock title %}
+{% block content %}
+<div class="row mt-5 bg-light p-3">
+    <div class="col-lg-12">
+        {% if "name" in data %} {# TODO: implement better way of checking type #}
+            {{ render_manage_title(data["name"], data["type"], data["running"]) }}
+                {% if data["type"] == "generator-filter" %}
+                    <p>Currently on {{data["iterations"]}}/{{data["successful_iterations"]}} iteration with period of {{data["period"]}}s.</p>
+                {% else %}
+                    <p>Currently on {{data["iterations"]}} iteration with period of {{data["period"]}}s.</p>
+                {% endif %}
+        {% elif data["type"] == "aggregator" %}
+            {{ render_manage_title(service.name, data["type"], False) }}
+            <p>Curently running {{ data["status"] | length }} sub-aggregators.</p>
+        {% elif data["type"]  == "graphing-aggregator" %}
+            {{ render_manage_title(service.name, data["type"], False) }}
+        {% else %}
+            {{ render_manage_title(service.name, None, False) }}
+        {% endif %}
+        <div class="row">
+            {% if data["type"] == "generator" %}
+                {% for subs in ("getter", "sender") %}
+                    <div class="col-lg-6 font-monospace">
+                        <h4>Data {{subs}}:</h4>
+                        {{ render_subservices(data[subs]) }}
+                    </div>
+                {% endfor %}
+            {% elif data["type"] == "generator-filter" %}
+                <div class="col-lg-4 font-monospace">
+                    <h4>Current paths:</h4>
+                    {{render_subservices(data["filter"])}}
+                </div>
+                <div class="col-lg-4 font-monospace">
+                    <h4>Sender:</h4>
+                    {{render_subservices(data["sender"])}}
+                </div>
+                <div class="col-lg-4 font-monospace">
+                    <h4>Getter:</h4>
+                    {{render_subservices(data["getter"])}}
+                </div>
+            {% elif data["type"] == "aggregator" %}
+                {% for subs, item in data["status"].items() %}
+                    <div class="col-lg-4">
+                        <h4>Subaggregator '<a href="{{ service.address + '/' + subs }}" class="font-monospace">{{subs}}</a>':</h4>
+                        <div class="font-monospace">
+                            {{ render_subservices(item) }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% elif data["type"] == "graphing-aggregator" %}
+                <div class="col-lg-6">
+                    <h4>Graph</h4>
+                    {{ render_subservices(data["status"].pop("graph")) }}
+                </div>
+                <div class="col-lg-6">
+                    <h4>Aggregator</h4>
+                    {{ render_subservices(data["status"]) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="row mt-5 bg-light p-3">
+    <div class="col-lg-12">
+        <h2 class="font-monospace">Edit:</h2>
+        <div class="row">
+            {{ render_forms(data["type"], forms) }}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+<script src="/static/js/manage_base.js"></script>
+{% if data["type"] == "generator" %}
+<script src="/static/js/manage_generator.js"></script>
+{% elif data["type"] == "aggregator" %}
+<script src="/static/js/manage_aggregator.js"></script>
+{% elif data["type"] == "generator-filter" %}
+<script src="/static/js/manage_generator_filter.js"></script>
+{% elif data["type"] == "graphing-aggregator" %}
+<script src="/static/js/manage_graphing_aggregator.js"></script>
+{% else %}
+
+{% endif %}
+{% endblock scripts %}

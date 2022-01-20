@@ -1,0 +1,49 @@
+sources:
+  tt:
+    type: HTTP
+    url: https://teamtrees.vercel.app/api
+    json: False
+    send: MQTT
+    interval: 2
+
+  ts:
+    type: HTTP
+    url: https://tscache.com/donation_total.json
+    json: True
+    path: count
+    send: HTTP
+    interval: 5
+
+  random_from_web:
+    type: HTTP
+    url: http://www.randomnumberapi.com/api/v1.0/randomnumber
+    json: True
+    path: '0'
+    send: HTTP
+    interval: 10
+  
+  from_file:
+    type: file
+    path: Pipfile
+    send: MQTT
+    interval: 1
+
+  btc:
+    type: HTTP
+    url: https://api.coinbase.com/v2/prices/BTC-USD/buy
+    json: True
+    path: data amount
+    send: HTTP
+    interval: 5
+
+mqtt:
+  schema: mqtt
+  port: 1883
+  url: test.mosquitto.org
+  path: /async/test/
+
+http:
+  schema: http
+  url: localhost
+  path: /async/other_test/
+  port: 9999

@@ -1,0 +1,129 @@
+{% extends "include/main.jinja" %}
+{% from "include/macros.jinja" import render_badge with context %}
+
+{% macro render_manage_title(name, type, running) %}
+    <h1 style="font-family: monospace;">
+    {{ name }}
+    {% if type == "generator" or type == "generator-filter" %}
+        {% if running %}
+            <button type="button" class="btn btn-success" id="button">Running</button>
+        {% else %}
+            <button type="button" class="btn btn-warning" id="button">Paused</button>
+        {% endif %}
+    {% elif type == "aggregator" or type == "graphing-aggregator" %}
+        {{ render_badge("Running", "success") }}
+    {% else %}
+        {{ render_badge("Unknown", "danger", True)}}
+    {% endif %}
+
+    </h1>
+{% endmacro %}
+
+{% macro render_subservices(data) %}
+    {% if data is mapping%}
+        {% for name, item in data.items() %}
+            {% if item is mapping %}
+                {{- render_badge(name, "dark") -}}:
+                <div class="ms-4">
+                    {{ render_subservices(item) }}
+                </div>
+            {% elif item is sequence and item is not string %}
+                {{- render_badge(name, "dark") -}}:
+                {% for single in item %}
+                    <div class="ms-4">
+                        {{ render_subservices(single) }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="m-0">
+                {{- render_badge(name, "info", special_style="border-top-right-radius: 0; border-bottom-right-radius: 0" ) -}}
+                {{- render_badge(item, "secondary", special_style="border-top-left-radius: 0; border-bottom-left-radius: 0") -}}
+                </p>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {{- render_badge(data, "info") -}}
+    {% endif %}
+{% endmacro %}
+
+
+{% macro _render_form(form_id, items) %}
+{# form_id: str, items = [(name, type, required, label, help, special_tags, _)] #}
+    <form id="{{form_id}}" class="d-flex flex-column">
+        {% for name, type, required, label, help, special_tags, _ in items %}
+            <div class="mb-3">
+                {% if type == "checkbox" %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="true" id="{{ name }}" name="{{ name }}">
+                        <label class="form-check-label" for="{{ name }}" {{ special_tags or "" }}>{{label}}</label>
+                    </div>
+                {% elif type == "select" %}
+                    <label for="{{ name }}" class="form-label">{{label}}</label>
+                    <select class="form-select" name="{{ name }}" id="{{ name }}" {{ 'required' if required else "" }} {{ special_tags or "" }}>
+                        {% for item in _ %}
+                            <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                    <div id="{{ name }}-help" class="form-text">{{ help }}</div>
+                {% else %}
+                    <label for="{{ name }}" class="form-label">{{ label }}</label>
+                    <input type="{{ type }}" class="form-control" {{ 'required' if required else "" }} id="{{ name }}" name="{{ name }}" {{ special_tags or "" }}>
+                    <div id="{{ name }}-help" class="form-text">{{ help }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="mt-3 align-self-end">
+            <button type="submit" class="btn btn-outline-dark">Submit</button>
+        </div>
+    </form>
+
+
+{% endmacro %}
+
+{% macro render_forms(type, dict) %}
+    {% if type == "generator" %}
+        <div class="col-lg-6">
+            <h4>Data getter:</h4>
+            {{ _render_form("getter", dict["GENERATOR_GETTER"]) }}
+        </div>
+        <div class="col-lg-6">
+            <h4>Data sender:</h4>
+            {{ _render_form("sender", dict["GENERATOR_SENDER"]) }}
+        </div>
+    {% elif type == "aggregator" %}
+        <div class="col-lg-4">
+            <h4>Add aggregator</h4>
+            {{ _render_form("add", dict["AGGREGATOR_ADD"])}}
+        </div>
+        <div class="col-lg-4">
+            <h4>Change aggregator</h4>
+            {{ _render_form("change", dict["AGGREGATOR_CHANGE"])}}
+        </div>
+        <div class="col-lg-4">
+            <h4>Remove aggregator</h4>
+            {{ _render_form("remove", dict["AGGREGATOR_REMOVE"])}}
+        </div>
+    {% elif type == "generator-filter" %}
+        <div class="col-lg-4">
+            <h4>Data getter:</h4>
+            {{ _render_form("getter", dict["FILTER_GETTER"]) }}
+        </div>
+        <div class="col-lg-4">
+            <h4>Data sender:</h4>
+            {{ _render_form("sender", dict["FILTER_SENDER"]) }}
+        </div>
+        <div class="col-lg-4">
+            <h4>Data filter:</h4>
+            {{ _render_form("filter", dict["FILTER_CHANGE"]) }}
+        </div>
+    {% elif type == "graphing-aggregator" %}
+      <div class="col-lg-4">
+            <h4>Aggregator</h4>
+            {{ _render_form("part-aggregator", dict["AGGREGATOR_GRAPH_CHANGE"]) }}
+        </div>
+        <div class="col-lg-8">
+            <h4>Graph:</h4>
+            <div id="graph"></div>
+        </div>
+    {% endif %}
+{% endmacro %}

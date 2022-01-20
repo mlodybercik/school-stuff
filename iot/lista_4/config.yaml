@@ -1,0 +1,20 @@
+source:
+  btc:
+      type: HTTP
+      url: https://api.coinbase.com/v2/prices/BTC-USD/buy
+      json: True
+      path: data amount
+      send: HTTP
+      interval: 50
+
+mqtt:
+  schema: mqtt
+  port: 1883
+  url: test.mosquitto.org
+  path: /async/test
+
+http:
+  schema: http
+  port: 80
+  url: httpbin.org
+  path: /post

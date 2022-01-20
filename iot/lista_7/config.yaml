@@ -1,0 +1,16 @@
+source:
+  btc:
+      url: https://api.coinbase.com/v2/prices/BTC-USD/buy
+      interval: 30
+      filter:
+          soft: True
+          path:
+            - data
+            - data
+            - data
+
+http:
+  schema: http
+  port: 80
+  url: httpbin.org
+  path: /post

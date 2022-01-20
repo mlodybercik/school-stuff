@@ -1,0 +1,29 @@
+{% extends "include/main.jinja" %}
+{% block title %} Add {% endblock title %}
+{% block content %}
+<div class="row mt-5 bg-light p-3">
+    <h3>Add new service</h3>
+    <div class="col-lg-3"></div>
+    <div class="col-lg-6">
+        <form id="add">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <input required type="text" class="form-control" name="name">
+                <div class="form-text">Name of service</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="address">Address:</label>
+                <input required type="text" class="form-control" name="address">
+                <div class="form-text">Address of the service</div>
+            </div>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-outline-dark">Submit</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-lg-3"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/add.js"></script>
+{% endblock %}

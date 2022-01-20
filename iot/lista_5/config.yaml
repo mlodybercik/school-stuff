@@ -1,0 +1,7 @@
+services:
+   quadnine:
+    address: "http://10.0.0.220:9999"
+   agg:
+    address: "http://10.0.0.220:9998"
+   threenineseven:
+    address: "http://10.0.0.220:9997"
